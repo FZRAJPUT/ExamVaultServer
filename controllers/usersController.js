@@ -1,6 +1,6 @@
 import userModel from "../models/userModel.js";
 
-const registerUser = async (req, res) => {
+export const registerUser = async (req, res) => {
   const { fullname, email, branch } = req.body;
 
   try {
@@ -18,7 +18,7 @@ const registerUser = async (req, res) => {
 
     await newUser.save();
 
-    return res.status(201).json({
+    return res.status(200).json({
       success: true,
       message: "Registered successfully.",
     });
@@ -28,4 +28,25 @@ const registerUser = async (req, res) => {
   }
 };
 
-export default registerUser;
+export const userDetails = async (req,res)=>{
+  const { email } = req.query
+  try {
+    const details = await userModel.findOne({email})
+    if(details){
+      return res.status(201).json({
+        success : true,
+        details
+      })
+    }
+
+    return res.status(409).json({
+      success: false,
+      message:"User Not Found"
+    })
+  } catch (error) {
+    res.status(500).json({
+      success:false,
+      message:"Something went wrong"
+    })
+  }
+}
