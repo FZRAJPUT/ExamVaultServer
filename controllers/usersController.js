@@ -1,19 +1,19 @@
 import userModel from "../models/userModel.js";
 
 const registerUser = async (req, res) => {
-  const { fullname, email, department } = req.body;
+  const { fullname, email, branch } = req.body;
 
   try {
-    const isExist = await userModel.findOne({ email }); // ✅ Added await
+    const isExist = await userModel.findOne({ email });
 
     if (isExist) {
-      return res.status(409).json({ message: "Email is already in use" });
+      return res.status(409).json({ success: true, message: "Email is already in use" });
     }
 
     const newUser = new userModel({
       fullname,
       email,
-      department,
+      branch,
     });
 
     await newUser.save();
