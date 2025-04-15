@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema({
     enum: ['CSE', 'ME', 'EE', 'CE'],
     required: true
   },
-    created_at: { type: Date, default: Date.now },
+  created_at: { type: Date, default: Date.now },
 });
 
 const userModel = mongoose.models.users || mongoose.model("users", userSchema);
