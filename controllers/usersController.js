@@ -7,7 +7,9 @@ export const registerUser = async (req, res) => {
     const isExist = await userModel.findOne({ email });
 
     if (isExist) {
-      return res.status(409).json({ success: true, message: "Email is already in use" });
+      return res
+        .status(409)
+        .json({ success: true, message: "Email is already in use" });
     }
 
     const newUser = new userModel({
@@ -22,31 +24,33 @@ export const registerUser = async (req, res) => {
       success: true,
       message: "Registered successfully.",
     });
-
   } catch (error) {
-    res.status(500).json({ message: "Something went wrong", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Something went wrong", error: error.message });
   }
 };
 
-export const userDetails = async (req,res)=>{
-  const { email } = req.query
+export const userDetails = async (req, res) => {
+  const { email } = req.body;
   try {
-    const details = await userModel.findOne({email})
-    if(details){
+    const details = await userModel.findOne({ email });
+
+    if (details) {
       return res.status(201).json({
-        success : true,
-        details
-      })
+        success: true,
+        details,
+      });
     }
 
     return res.status(409).json({
       success: false,
-      message:"User Not Found"
-    })
+      message: "Email not Registered!",
+    });
   } catch (error) {
     res.status(500).json({
-      success:false,
-      message:"Something went wrong"
-    })
+      success: false,
+      message: "Something went wrong",
+    });
   }
-}
+};
