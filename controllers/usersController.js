@@ -1,35 +1,67 @@
+import otpModel from "../models/otpModel.js";
 import userModel from "../models/userModel.js";
+import { sendOTPEmail } from '../utils/sendOTPEmail.js';
 
 export const registerUser = async (req, res) => {
   const { fullname, email, branch } = req.body;
 
   try {
     const isExist = await userModel.findOne({ email });
-
     if (isExist) {
-      return res
-        .status(409)
-        .json({ success: true, message: "Email is already in use" });
+      return res.json({ success: false, message: "Email is already in use" });
+    }
+
+    // Generate a 6-digit OTP
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Save OTP in a temporary collection
+    await otpModel.insertMany(
+      { email, otp: otpCode, fullname, branch, createdAt: new Date() },
+      { upsert: true, new: true }
+    );
+
+    // Send the OTP to email
+    await sendOTPEmail(email, otpCode);
+
+    res.json({
+      success: true,
+      message: "OTP sent to email. Please verify to complete registration.",
+    });
+  } catch (error) {
+    res.json({ success: false, message: "Something went wrong", error: error.message });
+    console.log(error.message);
+  }
+};
+
+export const verifyOTP = async (req, res) => {
+  const { email, otp } = req.body;
+
+  try {
+    const record = await otpModel.findOne({ email });
+
+    if (!record) {
+      return res.json({ success: false, message: "OTP expired or invalid" });
+    }
+
+    if (record.otp !== otp) {
+      return res.json({ success: false, message: "Incorrect OTP" });
     }
 
     const newUser = new userModel({
-      fullname,
-      email,
-      branch,
+      fullname: record.fullname,
+      email: record.email,
+      branch: record.branch,
     });
 
+    await otpModel.deleteOne({ email }); // Clean up OTP after verification
     await newUser.save();
 
-    return res.status(200).json({
-      success: true,
-      message: "Registered successfully.",
-    });
+    res.json({ success: true, message: "User registered successfully" });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Something went wrong", error: error.message });
+    res.json({ success: false, message: "Failed to verify OTP", error: error.message });
   }
 };
+
 
 export const userDetails = async (req, res) => {
   const { email } = req.body;
@@ -37,18 +69,19 @@ export const userDetails = async (req, res) => {
     const details = await userModel.findOne({ email });
 
     if (details) {
-      return res.status(201).json({
+      return res.json({
         success: true,
         details,
+        message:"Login Successfull"
       });
     }
 
-    return res.status(409).json({
+    return res.json({
       success: false,
       message: "Email not Registered!",
     });
   } catch (error) {
-    res.status(500).json({
+    res.json({
       success: false,
       message: "Something went wrong",
     });
