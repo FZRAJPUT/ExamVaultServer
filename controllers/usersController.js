@@ -1,6 +1,6 @@
 import otpModel from "../models/otpModel.js";
 import userModel from "../models/userModel.js";
-import { sendOTPEmail } from '../utils/sendOTPEmail.js';
+import { sendOTPEmail } from "../utils/sendOTPEmail.js";
 
 export const registerUser = async (req, res) => {
   const { fullname, email, branch } = req.body;
@@ -16,8 +16,16 @@ export const registerUser = async (req, res) => {
 
     // Save OTP in a temporary collection
     await otpModel.insertMany(
-      { email, otp: otpCode, fullname, branch, createdAt: new Date() },
-      { upsert: true, new: true }
+      { 
+        email, otp: 
+        otpCode, 
+        fullname, 
+        branch, 
+      },
+      { 
+        upsert: true, 
+        new: true 
+      }
     );
 
     // Send the OTP to email
@@ -28,7 +36,11 @@ export const registerUser = async (req, res) => {
       message: "OTP sent to email. Please verify to complete registration.",
     });
   } catch (error) {
-    res.json({ success: false, message: "Something went wrong", error: error.message });
+    res.json({
+      success: false,
+      message: "Something went wrong",
+      error: error.message,
+    });
     console.log(error.message);
   }
 };
@@ -43,7 +55,10 @@ export const verifyOTP = async (req, res) => {
       return res.json({ success: false, message: "OTP expired or invalid" });
     }
 
-    if (record.otp !== otp) {
+    console.log(record.otp, otp);
+    
+
+    if (Number(record.otp) === otp) {
       return res.json({ success: false, message: "Incorrect OTP" });
     }
 
@@ -58,10 +73,13 @@ export const verifyOTP = async (req, res) => {
 
     res.json({ success: true, message: "User registered successfully" });
   } catch (error) {
-    res.json({ success: false, message: "Failed to verify OTP", error: error.message });
+    res.json({
+      success: false,
+      message: "Failed to verify OTP",
+      error: error.message,
+    });
   }
 };
-
 
 export const userDetails = async (req, res) => {
   const { email } = req.body;
@@ -72,7 +90,7 @@ export const userDetails = async (req, res) => {
       return res.json({
         success: true,
         details,
-        message:"Login Successfull"
+        message: "Login Successfull",
       });
     }
 
