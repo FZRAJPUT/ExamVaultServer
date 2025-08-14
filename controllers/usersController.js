@@ -55,23 +55,29 @@ export const verifyOTP = async (req, res) => {
       return res.json({ success: false, message: "OTP expired or invalid" });
     }
 
-    console.log(record.otp, otp);
-    
-
-    if (Number(record.otp) === otp) {
+    // Compare OTPs as strings or numbers consistently
+    if (Number(record.otp) !== Number(otp)) {
       return res.json({ success: false, message: "Incorrect OTP" });
     }
 
+    // Check if the user is already registered
+    const existingUser = await userModel.findOne({ email });
+    if (existingUser) {
+      await otpModel.deleteOne({ email }); // Clean up OTP if exists
+      return res.json({ success: false, message: "Email already in use" });
+    }
+
+    // Register new user
     const newUser = new userModel({
       fullname: record.fullname,
       email: record.email,
       branch: record.branch,
     });
 
-    await otpModel.deleteOne({ email }); // Clean up OTP after verification
     await newUser.save();
+    await otpModel.deleteOne({ email }); // Clean up OTP after verification
 
-    res.json({ success: true, message: "User registered successfully" });
+    return res.json({ success: true, message: "User registered successfully" });
   } catch (error) {
     res.json({
       success: false,
@@ -80,6 +86,7 @@ export const verifyOTP = async (req, res) => {
     });
   }
 };
+
 
 export const userDetails = async (req, res) => {
   const { email } = req.body;
