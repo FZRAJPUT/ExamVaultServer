@@ -23,7 +23,9 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "imagekit": "^6.0.0",
     "mongoose": "^8.10.0",
+    "multer": "^2.0.2",
     "nodemailer": "^6.10.1"
   },
   "devDependencies": {

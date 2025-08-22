@@ -8,6 +8,10 @@ const userSchema = new mongoose.Schema({
     enum: ['CSE', 'ME', 'EE', 'CE'],
     required: true
   },
+   profilePicture: {
+      type: String,
+      default: "", // Or a URL to a default avatar
+    },
   created_at: { type: Date, default: Date.now },
 });
 
